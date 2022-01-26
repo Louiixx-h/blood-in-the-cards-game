@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bef03dd239ea234c8c037d05bb4103e, type: 3}
+  m_Name: CardMoveLeft
+  m_EditorClassIdentifier: 
+  name: Mover para a esquerda.
+  description: "Esta \xE9 a carta mais fatal do game. Um tiro certeiro na cabe\xE7a
+    vence a rodada."
+  parameterName: move_left
+  type: 1
+  targetBody: 6
+  movement: 2
+  image: {fileID: 4800566814532983255, guid: 993e763e4a339c04a96fd53d12b1748b, type: 3}

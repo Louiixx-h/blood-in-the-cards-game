@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bef03dd239ea234c8c037d05bb4103e, type: 3}
+  m_Name: CardLeftLegShot
+  m_EditorClassIdentifier: 
+  name: Tiro na perna esquerda.
+  description: "Esta \xE9 a carta mais fatal do game. Um tiro certeiro na cabe\xE7a
+    vence a rodada."
+  parameterName: leg_left
+  type: 0
+  targetBody: 4
+  movement: 5
+  image: {fileID: 6084249756908604392, guid: 993e763e4a339c04a96fd53d12b1748b, type: 3}
