@@ -5,58 +5,127 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private Animator m_Animator;
+    
+    CardTemplate m_CurrentMove;
+    CardTemplate m_CurrentAction;
+    bool m_IsReady = false;
+    float m_SecondsAnimation = 1f;
+    public string m_NamePlayer = "Jogador";
 
-    private CardTemplate m_CurrentMove, m_CurrentAction;
-    public bool m_IsReady = false;
+    public delegate void ActionDelegate(CardTemplate enumBody);
+    public event ActionDelegate OnAction;
 
-    public delegate void Action(CardTemplate cardInfo);
-    public event Action OnAction;
+    public delegate void UseCardsDelegate();
+    public event UseCardsDelegate OnUseCards;
 
-    public delegate void Move(CardTemplate cardInfo);
-    public event Move OnMove;
+    public delegate void AffectedSiteDelegate(EnumBody body, string name);
+    public event AffectedSiteDelegate OnAffectedSite;
 
-    public void DoMove()
+    public bool IsReady
     {
-        print(m_CurrentMove.name);
-        m_Animator.SetTrigger(m_CurrentMove.name);
+        get => m_IsReady;
     }
 
     public void DoAction()
     {
-        m_Animator.SetTrigger(m_CurrentAction.name);
-        m_Animator.ResetTrigger(m_CurrentAction.name);
+        OnUseCards.Invoke();
+        OnAction.Invoke(m_CurrentAction);
+        GamaManager.OnAction(m_NamePlayer);
+        StartCoroutine(ActionAnimation());
+    }
+
+    IEnumerator ActionAnimation()
+    {
+        //m_Animator.SetBool(m_CurrentAction.parameterName, true);
+        yield return new WaitForSeconds(m_SecondsAnimation);
+        //m_Animator.SetBool(m_CurrentAction.parameterName, false);
+        yield return null;
     }
 
     public void SetCard(CardTemplate card)
     {
-        if (card.type.Equals(EnumTypeCard.MOVE))
+        if (card.type.Equals(EnumTypeCard.MOVE)) m_CurrentMove = card;
+        else m_CurrentAction = card;
+
+        if (m_CurrentAction != null && m_CurrentMove != null)
         {
-            m_CurrentMove = card;
-        }
-        else
-        {
-            m_CurrentAction = card;
+            m_IsReady = true;
         }
     }
 
-    EnumBody calculateaffectedbodypart(EnumBody targeBody, EnumMovement movement)
+    public void RemoveCard(CardTemplate card)
+    {
+        if (card.type.Equals(EnumTypeCard.ACTION)) m_CurrentAction = null;
+        else m_CurrentMove = null;
+        m_IsReady = false;
+    }
+
+    public void DoMove(CardTemplate targeBody)
+    {
+        StartCoroutine(MoveAnimation(targeBody));
+    }
+
+    IEnumerator MoveAnimation(CardTemplate targeBody)
+    {
+        string nameAnimtion = m_CurrentMove.parameterName;
+        m_Animator.SetBool(nameAnimtion, true);
+        
+        yield return new WaitForSeconds(m_SecondsAnimation);
+        
+        m_Animator.SetBool(nameAnimtion, false);
+        EnumBody bodyAffected = Calculateaffectedbodypart(targeBody.targetBody);
+        OnAffectedSite.Invoke(bodyAffected, m_NamePlayer);
+        
+        yield return null;
+    }
+
+    public void CalculateDamage(CardTemplate targeBody)
+    {
+        DoMove(targeBody);
+    }
+
+    EnumBody Calculateaffectedbodypart(EnumBody targeBody)
     {
         if (targeBody == EnumBody.HEAD)
         {
-            if (movement == EnumMovement.IDLE) return EnumBody.HEAD;
-            if (movement == EnumMovement.LEFT) return EnumBody.NONE;
-            if (movement == EnumMovement.RIGHT) return EnumBody.NONE;
-            if (movement == EnumMovement.DOWN) return EnumBody.NONE;
-            if (movement == EnumMovement.JUMP) return EnumBody.TRUNK;
-        }
+            if (m_CurrentMove.movement == EnumMovement.IDLE) return EnumBody.HEAD;
+            if (m_CurrentMove.movement == EnumMovement.LEFT) return EnumBody.NONE;
+            if (m_CurrentMove.movement == EnumMovement.RIGHT) return EnumBody.NONE;
+            if (m_CurrentMove.movement == EnumMovement.DOWN) return EnumBody.NONE;
+            if (m_CurrentMove.movement == EnumMovement.JUMP) return EnumBody.TRUNK;
+        }                    
         else if (targeBody == EnumBody.LEFT_ARM)
-        {
-            if (movement == EnumMovement.IDLE) return EnumBody.LEFT_ARM;
-            if (movement == EnumMovement.LEFT) return EnumBody.NONE;
-            if (movement == EnumMovement.RIGHT) return EnumBody.NONE;
-            if (movement == EnumMovement.DOWN) return EnumBody.NONE;
-            if (movement == EnumMovement.JUMP) return EnumBody.TRUNK;
-        }
-        return 0;
+        {                    
+            if (m_CurrentMove.movement == EnumMovement.IDLE) return EnumBody.LEFT_ARM;
+            if (m_CurrentMove.movement == EnumMovement.LEFT) return EnumBody.NONE;
+            if (m_CurrentMove.movement == EnumMovement.RIGHT) return EnumBody.NONE;
+            if (m_CurrentMove.movement == EnumMovement.DOWN) return EnumBody.NONE;
+            if (m_CurrentMove.movement == EnumMovement.JUMP) return EnumBody.TRUNK;
+        }                    
+        else if (targeBody == EnumBody.RIGHT_ARM)
+        {                    
+            if (m_CurrentMove.movement == EnumMovement.IDLE) return EnumBody.RIGHT_ARM;
+            if (m_CurrentMove.movement == EnumMovement.LEFT) return EnumBody.NONE;
+            if (m_CurrentMove.movement == EnumMovement.RIGHT) return EnumBody.LEFT_ARM;
+            if (m_CurrentMove.movement == EnumMovement.DOWN) return EnumBody.NONE;
+            if (m_CurrentMove.movement == EnumMovement.JUMP) return EnumBody.RIGHT_LEG;
+        }                    
+        else if (targeBody == EnumBody.LEFT_LEG)
+        {                    
+            if (m_CurrentMove.movement == EnumMovement.IDLE) return EnumBody.LEFT_LEG;
+            if (m_CurrentMove.movement == EnumMovement.LEFT) return EnumBody.RIGHT_LEG;
+            if (m_CurrentMove.movement == EnumMovement.RIGHT) return EnumBody.NONE;
+            if (m_CurrentMove.movement == EnumMovement.DOWN) return EnumBody.TRUNK;
+            if (m_CurrentMove.movement == EnumMovement.JUMP) return EnumBody.NONE;
+        }                    
+        else if (targeBody == EnumBody.RIGHT_LEG)
+        {                    
+            if (m_CurrentMove.movement == EnumMovement.IDLE) return EnumBody.RIGHT_LEG;
+            if (m_CurrentMove.movement == EnumMovement.LEFT) return EnumBody.NONE;
+            if (m_CurrentMove.movement == EnumMovement.RIGHT) return EnumBody.LEFT_LEG;
+            if (m_CurrentMove.movement == EnumMovement.DOWN) return EnumBody.TRUNK;
+            if (m_CurrentMove.movement == EnumMovement.JUMP) return EnumBody.NONE;
+        }                    
+        return 0;            
     }
 }

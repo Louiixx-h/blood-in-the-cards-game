@@ -9,6 +9,8 @@ public class ListView : MonoBehaviour
     [SerializeField] private GameObject m_CardItem;
     [SerializeField] private EnumTypeCard m_TypeList;
 
+    int m_MaxCards = 5;
+
     public delegate void ActionClickCard(CardTemplate cardInfo);
     public event ActionClickCard OnClickCard;
 
@@ -21,32 +23,68 @@ public class ListView : MonoBehaviour
     {
         foreach (var card in m_Cards)
         {
-            GameObject cardItem = Instantiate(m_CardItem, transform);
-            CardItem cardItemScript = cardItem.GetComponent<CardItem>();
-            cardItemScript.setCardInfo(card);
+            GameObject cardObj = Instantiate(m_CardItem, transform);
+            CardItem cardItem = cardObj.GetComponent<CardItem>();
+            cardItem.SetCardInfo(card);
+        }
+    }
 
-            cardItem.GetComponent<Button>().onClick.AddListener(delegate
+    public void IsVisible(bool enabled)
+    {
+        if (enabled) gameObject.SetActive(true); 
+        else gameObject.SetActive(false);
+    }
+
+    public void RemoveAllListeners()
+    {
+        foreach (Transform child in transform)
+        {
+            child.GetComponent<Button>().onClick.RemoveAllListeners();
+        }
+    }
+
+    public void AddAllListeners()
+    {
+        foreach (Transform child in transform)
+        {
+            CardItem cardItem = child.gameObject.GetComponent<CardItem>();
+            CardTemplate cardTemplate = cardItem.GetCardInfo();
+            child.GetComponent<Button>().onClick.AddListener(() =>
             {
-                OnClickCard.Invoke(card);
-                m_Cards.Remove(card);
-                cardItemScript.DeleteCard();
+                OnClick(cardTemplate, cardItem);
             });
         }
     }
 
-    public void RecoverCard(CardTemplate cardInfo)
+    public void RecoverCard(CardTemplate card)
     {
-        if (!cardInfo.type.Equals(m_TypeList)) return;
-        GameObject cardItem = Instantiate(m_CardItem, transform);
-        CardItem cardItemScript = cardItem.GetComponent<CardItem>();
-        cardItemScript.setCardInfo(cardInfo);
-        m_Cards.Add(cardInfo);
+        if (!card.type.Equals(m_TypeList) ||
+            m_Cards.Contains(card) ||
+            m_Cards.Count == m_MaxCards
+        ) return;
+        
+        GameObject cardObject = Instantiate(m_CardItem, transform);
+        CardItem cardItem = cardObject.GetComponent<CardItem>();
+        cardItem.SetCardInfo(card);
+        m_Cards.Add(card);
 
-        cardItem.GetComponent<Button>().onClick.AddListener(delegate
+        AddAllListeners();
+    }
+
+    void OnClick(CardTemplate card, CardItem cardItem)
+    {
+        OnClickCard.Invoke(card);
+        m_Cards.Remove(card);
+        cardItem.DeleteCard();
+        RemoveAllListeners();
+    }
+
+    internal bool HasCard()
+    {
+        if (m_Cards.Count == 0)
         {
-            OnClickCard.Invoke(cardInfo);
-            m_Cards.Remove(cardInfo);
-            cardItemScript.DeleteCard();
-        });
+            return false;
+        }
+        else return true;
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CardObject", menuName = "Card/New Card")]
 public class CardTemplate: ScriptableObject
 {
-    public string name;
+    public string nameCard;
     public string description;
     public string parameterName;
     public EnumTypeCard type;
