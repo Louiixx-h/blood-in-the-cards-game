@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Arqui Inimigo/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Arqui Inimigo/Scenes/CreditScene.unity
+    guid: be2b78cfaa5d7434881c287ccf36be86
   m_configObjects: {}

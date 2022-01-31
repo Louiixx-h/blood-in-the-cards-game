@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private Animator m_Animator;
     [SerializeField] private List<CardTemplate> m_Movements;
     [SerializeField] private List<CardTemplate> m_Actions;
+    [SerializeField] private AudioSource m_FireAudioSource;
 
     float m_SecondsAnimation = 1f;
 
@@ -22,6 +23,7 @@ public class Enemy : MonoBehaviour
 
     public void DoAction()
     {
+        m_FireAudioSource.Play();
         GamaManager.OnAction(m_NameEnemy);
         OnAction.Invoke(m_CurrentAction);
         StartCoroutine(ActionAnimation());
@@ -48,7 +50,6 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(m_SecondsAnimation);
         
         m_Animator.SetBool(nameAnimtion, false);
-        print(targeBody.targetBody);
         EnumBody bodyAffected = CalculateAffectedbodypart(targeBody.targetBody);
         OnAffectedSite.Invoke(bodyAffected, m_NameEnemy);
 

@@ -6,11 +6,6 @@ public class CardItem : MonoBehaviour
 {
     private CardTemplate m_CardInfo;
 
-    private void Start()
-    {
-        
-    }
-
     public void SetCardInfo(CardTemplate cardInfo)
     {
         
@@ -20,7 +15,6 @@ public class CardItem : MonoBehaviour
 
     void ConfigView()
     {
-        
         gameObject.GetComponent<Image>().sprite = m_CardInfo.image;
     }
 

@@ -5,6 +5,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private Animator m_Animator;
+    [SerializeField] private AudioSource  m_FireAudioSource;
     
     CardTemplate m_CurrentMove;
     CardTemplate m_CurrentAction;
@@ -28,6 +29,7 @@ public class Player : MonoBehaviour
 
     public void DoAction()
     {
+        m_FireAudioSource.Play();
         OnUseCards.Invoke();
         OnAction.Invoke(m_CurrentAction);
         GamaManager.OnAction(m_NamePlayer);

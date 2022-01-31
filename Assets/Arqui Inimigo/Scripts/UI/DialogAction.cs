@@ -16,6 +16,7 @@ public class DialogAction : MonoBehaviour
         gameObject.transform.LeanScale(toScale, 0.4f);
         yield return new WaitForSeconds(0.6f);
         gameObject.SetActive(false);
+        gameObject.transform.localScale = Vector3.one;
         yield return null;
     }
 }

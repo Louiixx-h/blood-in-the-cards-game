@@ -25,6 +25,9 @@ public class GamaManager : MonoBehaviour
     public delegate void ChangeStateDelegate(StateGame state);
     public static ChangeStateDelegate ChangeState;
 
+    public delegate void StateChooseMapDelegate();
+    public static StateChooseMapDelegate OnStateChooseMap;
+
     public delegate void StateCountSecondDelegate();
     public static StateCountSecondDelegate OnStateCountSeconds;
 
@@ -38,7 +41,7 @@ public class GamaManager : MonoBehaviour
     public static StateTurnEnemyDelegate OnStateTurnEnemy;
 
     public delegate void StateEndGameDelegate();
-    public static StateEndGameDelegate OnStateEndGame;
+    public static StateEndGameDelegate OnStateEndGame; 
 
     private void Awake()
     {
@@ -53,7 +56,7 @@ public class GamaManager : MonoBehaviour
     void Start()
     {
         InitObservers();
-        ChangeState(StateGame.STATE_COUNT_SECONDS);
+        ChangeState(StateGame.STATE_CHOOSE_MAP);
     }
 
     void InitObservers()
@@ -66,6 +69,7 @@ public class GamaManager : MonoBehaviour
     private void ConfigState()
     {
         ChangeState += ChangeStateGame;
+        OnStateCountSeconds += CountSecondState;
         OnStateRunGame += RunState;
         OnStateTurnPlayer += TurnPlayerState;
         OnStateTurnEnemy += TurnEnemyState;
@@ -88,6 +92,9 @@ public class GamaManager : MonoBehaviour
     {
         switch (state)
         {
+            case StateGame.STATE_CHOOSE_MAP:
+                OnStateChooseMap.Invoke();
+                break;
             case StateGame.STATE_COUNT_SECONDS:
                 OnStateCountSeconds.Invoke();
                 break;
@@ -104,6 +111,17 @@ public class GamaManager : MonoBehaviour
                 OnStateEndGame.Invoke();
                 break;
         }
+    }
+
+    void ChooseMapState()
+    {
+        m_Enemy.ChooseCards();
+    }
+
+    void CountSecondState()
+    {
+        m_Enemy.gameObject.SetActive(true);
+        m_Player.gameObject.SetActive(true);
     }
 
     void RunState()
@@ -123,6 +141,10 @@ public class GamaManager : MonoBehaviour
 
     private void EndState()
     {
+        m_Enemy.gameObject.SetActive(false);
+        m_Player.gameObject.SetActive(false);
+
+        OnStateCountSeconds -= CountSecondState;
         m_Enemy.OnAction -= m_Player.CalculateDamage;
         m_Player.OnAffectedSite -= Damage;
         m_Player.OnAction -= m_Enemy.CalculateDamage;
@@ -200,6 +222,7 @@ public class GamaManager : MonoBehaviour
 
 public enum StateGame
 {
+    STATE_CHOOSE_MAP,
     STATE_COUNT_SECONDS,
     STATE_RUN_GAME,
     STATE_TURN_PLAYER,

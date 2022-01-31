@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: Fenix
-  productName: Arqui-Inimigos
+  productName: Blood In The Cards
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
@@ -597,7 +597,7 @@ PlayerSettings:
   metroCertificateNotAfter: 00adffbf3532d901
   metroApplicationDescription: 2D_BuiltInRenderer
   wsaImages: {}
-  metroTileShortName: Arqui-Inimigos
+  metroTileShortName: Blood In The Cards
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0

@@ -14,6 +14,7 @@ public class UIManager : MonoBehaviour
     [Header("LIST VIEW")]
     [SerializeField] private ListView m_ListViewAction;
     [SerializeField] private ListView m_ListViewMove;
+    [SerializeField] private ListViewMap m_ListViewMap;
     [SerializeField] private SwitchListView m_SwitchListView;
 
     [Header("CARD SELECTED")]
@@ -34,6 +35,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Text m_TurnEnemy;
     [SerializeField] private Text m_TextRewardEnemy;
     [SerializeField] private Text m_TextRewardPlayer;
+    [SerializeField] private Text m_TextGoldEnemy;
+    [SerializeField] private Text m_TextGoldPlayer;
 
     [Header("UI BUTTON")]
     [SerializeField] private Button m_PlayButton;
@@ -41,6 +44,12 @@ public class UIManager : MonoBehaviour
 
     [Header("UI DIALOG END GAME")]
     [SerializeField] private GameObject m_PanelShadow;
+
+    [Header("UI IMAGE")]
+    [SerializeField] private Image m_SceneImage;
+
+    [Header("UI PANEL")]
+    [SerializeField] private GameObject m_PanelChooseMap;
 
     int m_Timer = 3;
 
@@ -51,12 +60,13 @@ public class UIManager : MonoBehaviour
         InitialRewards();
         ClearTextsOfStatus();
 
+        GamaManager.OnStateChooseMap += ChooseMapState;
         GamaManager.OnStateCountSeconds += CountSecondsStateUI;
         GamaManager.OnStateRunGame += RunGameStateUI;
         GamaManager.OnStateTurnPlayer += TurnPlayerStateUI;
         GamaManager.OnStateTurnEnemy += TurnEnemyStateUI;
         GamaManager.OnStateTurnEnemy += TurnEnemyStateUI;
-        GamaManager.OnStateEndGame += EnGameStateUI;
+        GamaManager.OnStateEndGame += EndGameStateUI;
         GamaManager.OnAction += ChooseAction;
         GamaManager.OnIncrementReward += IncrementReward;
         GamaManager.OnShowDialog += ShowDialog;
@@ -72,6 +82,8 @@ public class UIManager : MonoBehaviour
 
         m_CardSelectedPlayer.OnDiscardCard += m_ListViewAction.RecoverCard;
         m_CardSelectedPlayer.OnDiscardCard += m_ListViewMove.RecoverCard;
+
+        m_ListViewMap.OnClickMap += SetMap;
     }
 
     void ConfigPlayer()
@@ -83,9 +95,84 @@ public class UIManager : MonoBehaviour
         m_Player.OnUseCards += m_CardSelectedPlayer.RemoveAllListeners;
     }
 
+    void ChooseMapState()
+    {
+    }
+
     void CountSecondsStateUI()
     {
         StartCoroutine(CountSeconds());
+    }
+
+    private void RunGameStateUI()
+    {
+        if (!m_ListViewAction.HasCard() && !m_ListViewMove.HasCard())
+        {
+            GamaManager.ChangeState(StateGame.STATE_END_GAME);
+            return;
+        }
+
+        m_TurnEnemy.text = "Escolhendo...";
+        m_TurnPlayer.text = "Escolhendo...";
+
+        m_CardSelectedPlayer.RemoveCards();
+        m_ListViewAction.AddAllListeners();
+        m_ListViewMove.AddAllListeners();
+
+        m_PlayButton.onClick.AddListener(() =>
+        {
+            if (!m_Player.IsReady)
+            {
+                ShowDialog("Alerta: O jogador não está pronto!");
+                return;
+            }
+            m_PlayButton.onClick.RemoveAllListeners();
+            SetCardEnemy();
+            GamaManager.ChangeState.Invoke(StateGame.STATE_TURN_PLAYER);
+        });
+    }
+
+    private void TurnPlayerStateUI()
+    {
+        m_TurnPlayer.text = "Seu turno";
+        m_TurnEnemy.text = "";
+    }
+
+    private void TurnEnemyStateUI()
+    {
+        m_TurnEnemy.text = "Turno inimigo";
+        m_TurnPlayer.text = "";
+    }
+
+    private void EndGameStateUI()
+    {
+        m_TextGoldEnemy.text = m_TextRewardEnemy.text;
+        m_TextGoldPlayer.text = m_TextRewardPlayer.text;
+        m_PanelShadow.gameObject.SetActive(false);
+        m_PanelShadow.gameObject.GetComponentInChildren<DialogStatus>().StartDialog();
+
+        RemoveAllListeners();
+
+        int valueEnemy = GetIntFromString(m_TextRewardEnemy.text);
+        int valuePlayer = GetIntFromString(m_TextRewardPlayer.text);
+
+        if (valueEnemy > valuePlayer)
+        {
+            m_TextWin.text = "Você perdeu!!";
+        }
+        else
+        {
+            m_TextWin.text = "Você ganhou!!";
+        }
+
+        m_PanelShadow.SetActive(true);
+        m_PanelShadow.GetComponentInChildren<DialogStatus>().StartDialog();
+        m_ExitButton.onClick.AddListener(() =>
+        {
+            SceneManager.LoadScene("MenuScene");
+            GamaManager.Instance.Destroy();
+            Destroy(gameObject);
+        });
     }
 
     IEnumerator CountSeconds()
@@ -114,75 +201,11 @@ public class UIManager : MonoBehaviour
         GamaManager.ChangeState(StateGame.STATE_RUN_GAME);
     }
 
-    private void RunGameStateUI()
+    void SetMap(MapTemplate mapInfo)
     {
-        print("addlistener1");
-        if (!m_ListViewAction.HasCard() && !m_ListViewMove.HasCard())
-        {
-            GamaManager.ChangeState(StateGame.STATE_END_GAME);
-            return;
-        }
-
-        m_TurnEnemy.text = "Escolhendo...";
-        m_TurnPlayer.text = "Escolhendo...";
-
-        m_CardSelectedPlayer.RemoveCards();
-        m_ListViewAction.AddAllListeners();
-        m_ListViewMove.AddAllListeners();
-        print("addlistener");
-
-        m_PlayButton.onClick.AddListener(() =>
-        {
-            if (!m_Player.IsReady)
-            {
-                ShowDialog("Alerta: O jogador não está pronto!");
-                return;
-            }
-            m_PlayButton.onClick.RemoveAllListeners();
-            SetCardEnemy();
-            GamaManager.ChangeState.Invoke(StateGame.STATE_TURN_PLAYER);
-        });
-    }
-
-    private void TurnPlayerStateUI()
-    {
-        m_TurnPlayer.text = "Seu turno";
-        m_TurnEnemy.text = "";
-    }
-
-    private void TurnEnemyStateUI()
-    {
-        m_TurnEnemy.text = "Turno inimigo";
-        m_TurnPlayer.text = "";
-    }
-
-    private void EnGameStateUI()
-    {
-        m_PanelShadow.gameObject.SetActive(false);
-        m_PanelShadow.gameObject.GetComponentInChildren<DialogStatus>().StartDialog();
-
-        RemoveAllListeners();
-
-        int valueEnemy = GetIntFromString(m_TextRewardEnemy.text);
-        int valuePlayer = GetIntFromString(m_TextRewardPlayer.text);
-
-        if (valueEnemy > valuePlayer)
-        {
-            m_TextWin.text = "Você perdeu!!";
-        }
-        else
-        {
-            m_TextWin.text = "Você ganhou!!";
-        }
-
-        m_PanelShadow.SetActive(true);
-        m_PanelShadow.GetComponentInChildren<DialogStatus>().StartDialog();
-        m_ExitButton.onClick.AddListener(() =>
-        {
-            SceneManager.LoadScene("MenuScene");
-            GamaManager.Instance.Destroy();
-            Destroy(gameObject);
-        });
+        m_SceneImage.sprite = mapInfo.m_Sprite;
+        m_PanelChooseMap.SetActive(false);
+        GamaManager.ChangeState(StateGame.STATE_COUNT_SECONDS);
     }
 
     void SetCardEnemy()
@@ -280,7 +303,7 @@ public class UIManager : MonoBehaviour
         GamaManager.OnStateTurnPlayer -= TurnPlayerStateUI;
         GamaManager.OnStateTurnEnemy -= TurnEnemyStateUI;
         GamaManager.OnStateTurnEnemy -= TurnEnemyStateUI;
-        GamaManager.OnStateEndGame -= EnGameStateUI;
+        GamaManager.OnStateEndGame -= EndGameStateUI;
         GamaManager.OnAction -= ChooseAction;
         GamaManager.OnIncrementReward -= IncrementReward;
         GamaManager.OnShowDialog -= ShowDialog;
