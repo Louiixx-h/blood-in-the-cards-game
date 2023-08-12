@@ -1,7 +1,9 @@
 # Blood In The Cards
 Está chegando a hora de saber quem é o mais mortal do velho-oeste, use suas cartas na manga para vencer.
 
+<a href="https://louiixx-h.itch.io/blood-in-the-cards" target="_blank">
 <img src="./github/button-play.png" width="256px"/>
+</a>
 
 ## Mecânica
 No jogo existem 2 tipos de cartas e cada jogador possui o mesmo número disponível sendo ao todo 10  cartas, 5 de movimento e 5 de tiro essas cartas se classificam em: 
